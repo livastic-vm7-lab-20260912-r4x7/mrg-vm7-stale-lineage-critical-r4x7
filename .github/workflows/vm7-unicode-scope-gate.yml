@@ -1,0 +1,25 @@
+name: VM7 unicode scope gate
+
+on:
+  pull_request:
+
+jobs:
+  scope-detect:
+    runs-on: ubuntu-latest
+    outputs:
+      scopes: ${{ steps.mergify-scopes.outputs.scopes }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: mergify-scopes
+        uses: Mergifyio/gha-mergify-ci@v25
+        with:
+          action: scopes
+
+  workflow-test:
+    needs: scope-detect
+    if: ${{ fromJSON(needs.scope-detect.outputs.scopes).workflow-sensitive == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Controlled workflow-sensitive test must fail whenever workflow scope is detected"
+          exit 1
