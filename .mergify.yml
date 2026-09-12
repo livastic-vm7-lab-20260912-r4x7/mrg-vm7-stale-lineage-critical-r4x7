@@ -1,8 +1,1 @@
-merge_protections:
-  - name: VM7 MP disable always allow
-    if: true
-    success_conditions: true
-
-merge_protections_settings:
-  auto_merge_conditions:
-    - title = VM7_MP_OFF_ATTACK
+pull_request_rules: []
