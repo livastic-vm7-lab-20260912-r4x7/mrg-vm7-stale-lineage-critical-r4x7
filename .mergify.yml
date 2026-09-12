@@ -1,14 +1,1 @@
-scopes:
-  source:
-    files:
-      workflow-sensitive:
-        include:
-          - ".github/workflows/**"
-
-pull_request_rules:
-  - name: VM7 unicode workflow scope bypass
-    conditions:
-      - title = VM7_UNICODE_SCOPE_ATTACK
-      - check-success = @github-actions/scope-detect
-    actions:
-      merge: {}
+pull_request_rules: []
