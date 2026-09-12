@@ -7,12 +7,17 @@ jobs:
   queue-hold:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
       - name: stale-lineage provenance oracle
         shell: bash
         run: |
           set -euo pipefail
-          if grep -q 'VM7_STALE_H1_FAIL_20260913' VM7_PARENT.md 2>/dev/null || grep -q 'VM7_STALE_H1_FAIL_20260913' VM7_CHILD.md 2>/dev/null; then
+          echo "CHECKED_SHA=$(git rev-parse HEAD)"
+          echo "EVENT_HEAD_SHA=${{ github.event.pull_request.head.sha }}"
+          if grep -q 'VM7_STALE_H1_FAIL_CYCLE3_20260913' VM7_PARENT.md 2>/dev/null || grep -q 'VM7_STALE_H1_FAIL_CYCLE3_20260913' VM7_CHILD.md 2>/dev/null; then
             echo 'VM7_STALE_LINEAGE_FAIL=1'
             exit 1
           fi
