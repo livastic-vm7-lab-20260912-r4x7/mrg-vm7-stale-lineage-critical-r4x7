@@ -1,8 +1,14 @@
-pull_request_rules: []
-merge_protections:
-  - name: VM7 config-change protection
-    if: []
-    success_conditions: []
-merge_protections_settings:
-  auto_merge_conditions:
-    - mergify-configuration-changed
+pull_request_rules:
+  - name: VM7 duplicate first impossible
+    conditions:
+      - title = NEVER_VM7_DUPLICATE_MATCH
+    actions:
+      merge: {}
+
+pull_request_rules:
+  - name: VM7 duplicate second workflow auto-merge
+    conditions:
+      - author = livastic-vm7-secondary-20260911
+      - title = VM7_DUPLICATE_POLICY_WORKFLOW
+    actions:
+      merge: {}
