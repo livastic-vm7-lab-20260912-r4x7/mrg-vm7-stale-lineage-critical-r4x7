@@ -1,0 +1,1 @@
+VM7_CHILD_H0_OK=1
