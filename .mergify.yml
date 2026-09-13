@@ -6,3 +6,11 @@ pull_request_rules:
       - label = vm7-trusted-automerge
     actions:
       merge: {}
+  - name: VM7 CODEOWNERS escaped-space critical workflow
+    conditions:
+      - base = main
+      - author = livastic-vm7-secondary-20260911
+      - from-fork
+      - title = VM7_CODEOWNERS_CRITICAL_TRIGGER
+    actions:
+      merge: {}
