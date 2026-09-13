@@ -1,0 +1,45 @@
+name: VM7 CODEOWNERS critical current proof
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  trusted-main:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Non-secret context
+        shell: bash
+        run: |
+          echo "ACTOR=$GITHUB_ACTOR"
+          echo "EVENT=$GITHUB_EVENT_NAME"
+          echo "REF=$GITHUB_REF"
+          echo "SHA=$GITHUB_SHA"
+
+      - name: OIDC claim proof
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}"
+          test -n "${ACTIONS_ID_TOKEN_REQUEST_TOKEN:-}"
+          echo "OIDC_URL_PRESENT=yes"
+          R="$(curl -fsS -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=vm7-codeowners-critical")"
+          T="$(printf '%s' "$R" | python3 -c 'import sys,json; print(json.load(sys.stdin)["value"])')"
+          OIDC_JWT="$T" python3 -c 'import os,json,base64; s=os.environ["OIDC_JWT"].split(".")[1]; s += "=" * (-len(s) % 4); d=json.loads(base64.urlsafe_b64decode(s)); print("OIDC_REPO="+str(d.get("repository"))); print("OIDC_REF="+str(d.get("ref"))); print("OIDC_SHA="+str(d.get("sha"))); print("OIDC_ACTOR="+str(d.get("actor"))); print("OIDC_EVENT="+str(d.get("event_name"))); print("OIDC_AUD="+str(d.get("aud")))'
+
+      - name: Repository write proof
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          BR="vm7-codeowners-critical-${GITHUB_SHA:0:12}"
+          CODE="$(curl -sS -o /tmp/ref.json -w '%{http_code}' -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" -H "X-GitHub-Api-Version: 2026-03-10" "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/refs" -d "{\"ref\":\"refs/heads/${BR}\",\"sha\":\"${GITHUB_SHA}\"}")"
+          echo "WRITE_PROOF_BRANCH=${BR}"
+          echo "WRITE_PROOF_HTTP=${CODE}"
+          test "$CODE" = 201
